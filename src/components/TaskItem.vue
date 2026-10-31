@@ -3,28 +3,36 @@ const props = defineProps({
   taskInfo: Object
 })
 
-const emit = defineEmits(['enviarTaskDelete'])
+const emit = defineEmits(['toggle-task', 'delete-task'])
 
-const enviarTaskDelete = (taskElim) => {
-  emit('enviarTaskDelete', taskElim)
+const toggleTask = () => {
+  emit('toggle-task', props.taskInfo)
+}
+
+const deleteTask = () => {
+  emit('delete-task', props.taskInfo)
 }
 </script>
 
 <template>
-  <span>{{ props.taskInfo.title }}</span>
+  <span class="title">{{ props.taskInfo.title }}</span>
   <span class="date">Created: {{ props.taskInfo.date }}</span>
   <span :class="['status', { completed: props.taskInfo.completed }]">
     {{ props.taskInfo.completed ? 'Completed' : 'Pending' }}
   </span>
   <div class="actions">
-    <button type="button" @click="props.taskInfo.completed = !props.taskInfo.completed">
+    <button type="button" @click="toggleTask">
       {{ props.taskInfo.completed ? 'Mark pending' : 'Complete' }}
     </button>
-    <button type="button" class="delete" @click="enviarTaskDelete(props.taskInfo)">Delete</button>
+    <button type="button" class="delete" @click="deleteTask">Delete</button>
   </div>
 </template>
 
 <style scoped>
+.title {
+  overflow-wrap: anywhere;
+}
+
 .date {
   color: #6b7280;
   font-size: 0.85rem;

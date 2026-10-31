@@ -5,6 +5,7 @@ import TaskList from './components/TaskList.vue'
 import TaskForm from './components/TaskForm.vue'
 
 const showNotCompletedTasks = ref(false)
+const notification = ref('')
 
 const tasks = ref([
   new Task('1', 'Task 1'),
@@ -14,14 +15,37 @@ const tasks = ref([
 
 const addTask = (newTask) => {
   tasks.value.push(newTask)
+  notification.value = `Task "${newTask.title}" added.`
 }
 
 const deleteTask = (task) => {
-  tasks.value.splice(tasks.value.indexOf(task), 1)
+  const taskIndex = tasks.value.findIndex(currentTask => currentTask.id === task.id)
+  if (taskIndex === -1) {
+    return
+  }
+
+  tasks.value.splice(taskIndex, 1)
+  notification.value = `Task "${task.title}" deleted.`
+}
+
+const toggleTask = (task) => {
+  const taskToUpdate = tasks.value.find(currentTask => currentTask.id === task.id)
+  if (!taskToUpdate) {
+    return
+  }
+
+  taskToUpdate.completed = !taskToUpdate.completed
+  notification.value = taskToUpdate.completed
+    ? `Task "${taskToUpdate.title}" completed.`
+    : `Task "${taskToUpdate.title}" marked as pending.`
 }
 
 const pendingTasks = computed(() => {
   return tasks.value.filter(task => !task.completed).length
+})
+
+const completedTasks = computed(() => {
+  return tasks.value.filter(task => task.completed).length
 })
 </script>
 
@@ -30,6 +54,8 @@ const pendingTasks = computed(() => {
     <h1>Task Manager</h1>
 
     <TaskForm :taskList="tasks" @enviarTaskCreate="addTask" />
+
+    <p v-if="notification" class="notification" role="status">{{ notification }}</p>
 
     <label class="filter">
       <input v-model="showNotCompletedTasks" type="checkbox" />
@@ -40,13 +66,15 @@ const pendingTasks = computed(() => {
       <TaskList
         :taskList="tasks"
         :showNotCompletedTasks="showNotCompletedTasks"
-        @gestionarDelTask="deleteTask"
+        @toggle-task="toggleTask"
+        @delete-task="deleteTask"
       />
     </ul>
 
     <footer class="summary">
       <span>Total: {{ tasks.length }}</span>
       <span>Pending: {{ pendingTasks }}</span>
+      <span>Completed: {{ completedTasks }}</span>
     </footer>
   </main>
 </template>
@@ -75,6 +103,15 @@ h1 {
   display: block;
   margin-bottom: 18px;
   color: #4b5563;
+}
+
+.notification {
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
 }
 
 .task-list {
